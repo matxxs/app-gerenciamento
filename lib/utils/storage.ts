@@ -13,7 +13,7 @@ export const loadAuthState = (): AuthState | undefined => {
       return undefined;
     }
     const state: AuthState = JSON.parse(serializedState);
-    // Verificação simples para garantir que o estado carregado é válido
+    
     if (state.isAuthenticated && state.user) {
         return state;
     }

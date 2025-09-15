@@ -1,18 +1,24 @@
-"use client";
+"use client"
 
-import { type ReactNode, useEffect, useState } from "react";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { useAppSelector } from "@/lib/hooks/app-selector";
+import { selectIsAuthenticated } from "@/lib/features/auth/auth-slice";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/lib/hooks";
-import { selectIsAuthenticated } from "@/lib/features/auth/authSlice";
-import { Nav } from "@/app/components/Nav";
-import styles from "@/app/styles/layout.module.css";
+import { useEffect, useState } from "react";
 
-export default function PrivateLayout({ children }: { children: ReactNode }) {
+export default function PrivateLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
+   useEffect(() => {
     setIsClient(true);
   }, []);
 
@@ -27,9 +33,35 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className={styles.container}>
-      <Nav />
-      <main className={styles.main}>{children}</main>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Building Your Application
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

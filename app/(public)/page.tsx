@@ -1,12 +1,11 @@
-"use client";
+import { LoginForm } from "@/components/auth/login-form";
 
-import { LoginForm } from "@/app/components/auth/LoginForm";
-import styles from "@/app/styles/layout.module.css"; 
-
-export default function LoginPage() {
+export default function Page() {
   return (
-    <main className={styles.mainCentered}>
-      <LoginForm />
-    </main>
-  );
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <LoginForm />
+      </div>
+    </div>
+  )
 }

@@ -132,62 +132,35 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getPool, sql } from '@/config/database';
-import { Usuario } from "@/lib/types";
+import { TelaPermissao, TelaPermissaoNode, Usuario } from "@/lib/types";
+
 // import bcrypt from 'bcryptjs';
 // import jwt from 'jsonwebtoken';
 
-// Tipagem para os dados que vêm do banco
-interface TelaPermissaoDB {
-    id_tela: number;
-    id_tela_pai: number | null;
-    titulo: string;
-    chave_tela: string;
-    descricao: string | null;
-    rota: string | null;
-    icone: string | null;
-    ordem: number;
-    pode_criar: boolean;
-    pode_ler: boolean;
-    pode_atualizar: boolean;
-    pode_deletar: boolean;
-}
 
-// Tipagem para a estrutura final, com a propriedade 'filhos'
-interface TelaPermissaoNode extends TelaPermissaoDB {
-    filhos: TelaPermissaoNode[];
-}
-
-/**
- * Função auxiliar para construir a árvore de menus a partir de uma lista plana.
- */
-function buildMenuTree(list: TelaPermissaoDB[]): TelaPermissaoNode[] {
+function buildMenuTree(list: TelaPermissao[]): TelaPermissaoNode[] {
     const map: { [key: number]: TelaPermissaoNode } = {};
     const roots: TelaPermissaoNode[] = [];
 
-    // Primeiro, cria um mapa de todos os nós para acesso rápido e adiciona a propriedade 'filhos'
     list.forEach(item => {
         map[item.id_tela] = { ...item, filhos: [] };
     });
 
-    // Agora, itera novamente para construir a árvore
     list.forEach(item => {
         const node = map[item.id_tela];
         if (item.id_tela_pai && map[item.id_tela_pai]) {
-            // Se tem um pai, adiciona este nó ao array 'filhos' do pai
             map[item.id_tela_pai].filhos.push(node);
         } else {
-            // Se não tem pai, é um nó raiz
             roots.push(node);
         }
     });
 
-    // Ordena os filhos de cada nó pela propriedade 'ordem'
     const sortChildren = (node: TelaPermissaoNode) => {
         node.filhos.sort((a, b) => a.ordem - b.ordem);
         node.filhos.forEach(sortChildren);
     };
     roots.forEach(sortChildren);
-    roots.sort((a, b) => a.ordem - b.ordem); // Ordena os menus principais
+    roots.sort((a, b) => a.ordem - b.ordem);
 
     return roots;
 }
@@ -203,7 +176,6 @@ export async function POST(request: NextRequest) {
 
         const pool = await getPool();
 
-        // 1. Busca o usuário pelo e-mail (sem alterações aqui)
         const userResult = await pool.request()
             .input('email', sql.VarChar, email)
             .query<Usuario>(`
@@ -235,7 +207,7 @@ export async function POST(request: NextRequest) {
         const telasResult = await pool.request()
             .input('id_funcao', sql.Int, usuario.id_funcao)
             .input('id_usuario', sql.Int, usuario.id_usuario)
-            .query<TelaPermissaoDB>(`
+            .query<TelaPermissao>(`
                 WITH BasePermissions AS (
                     -- Combina as permissões da função e do usuário, dando prioridade às do usuário
                     SELECT 

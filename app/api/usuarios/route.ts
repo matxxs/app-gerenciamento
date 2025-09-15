@@ -3,6 +3,7 @@ import { getPool } from '@/config/database';
 import { UsuarioLista } from "@/lib/types";
 
 
+
 export async function GET(request: NextRequest) {
   try {
     const pool = await getPool();

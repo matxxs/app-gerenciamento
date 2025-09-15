@@ -39,7 +39,6 @@ export interface TelaPermissaoNode extends TelaPermissao {
     filhos: TelaPermissaoNode[];
 }
 
-
 // Interface para as filiais que o usuário pode acessar
 export interface Filial {
   id_filial: number;

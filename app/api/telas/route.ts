@@ -39,9 +39,9 @@ import { getPool, sql } from '@/config/database';
 // Interface atualizada para refletir a nova estrutura da tabela
 interface Tela {
     id_tela: number;
-    id_tela_pai: number | null; // Adicionado
-    titulo: string;             // Renomeado de nome_tela
-    chave_tela: string;         // Adicionado
+    id_tela_pai: number | null; 
+    titulo: string;         
+    chave_tela: string;         
     descricao: string | null;
     rota: string | null;
     icone: string | null;

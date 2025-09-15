@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export default function DashboardPage() {
+export default function Page() {
   return (
     <div>
       <h1>Bem-vindo ao Dashboard!</h1>
