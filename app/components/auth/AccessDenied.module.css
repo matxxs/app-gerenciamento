@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  padding: 20px;
+  color: #333;
+}
+
+.errorCode {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #e74c3c;
+  margin: 0;
+}
+
+.title {
+  font-size: 2rem;
+  margin: 10px 0;
+  color: #555;
+}
+
+.message {
+  font-size: 1.1rem;
+  color: #777;
+  max-width: 400px;
+}
+
+.link {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.link:hover {
+  background-color: #2980b9;
+}
