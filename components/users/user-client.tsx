@@ -1,9 +1,8 @@
 "use client";
 
-import { selectPermissions } from "@/lib/features/auth/auth-slice";
 import { useGetUsersQuery } from "@/lib/features/users/user-api-slice";
-import { useAppSelector } from "@/lib/hooks/app-selector";
 import { usePermissions } from "@/lib/hooks/use-permissions";
+import { UserTable } from "./user-table";
 
 
 
@@ -31,13 +30,12 @@ export const UsuariosClient = () => {
   return (
     <div >
       <PageHeader />
-      {/* <UserTable users={users} /> */}
+      <UserTable users={users} />
     </div>
   );
 };
 
 const PageHeader = () => {
-  const permissions = useAppSelector(selectPermissions);
  const { pode_criar } = usePermissions('ADMIN_USUARIOS');
 
   const handleAdd = () => alert('Abrir modal para adicionar usuário...');
