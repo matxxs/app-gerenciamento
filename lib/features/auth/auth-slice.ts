@@ -1,7 +1,5 @@
-
 import { createAppSlice } from "@/lib/hooks/create-app-slice";
 import type { AuthState, Usuario, Permissoes } from "@/lib/types";
-
 import { loadAuthState, saveAuthState, clearAuthState } from "@/lib/utils/storage";
 
 interface LoginCredentials {
@@ -14,7 +12,6 @@ interface LoginResponse {
   permissoes: Permissoes;
 }
 
-// Tenta carregar o estado persistido. Se não conseguir, usa o estado inicial padrão.
 const persistedState = loadAuthState();
 
 const initialState: AuthState = persistedState || {
@@ -42,53 +39,43 @@ export const authSlice = createAppSlice({
             return rejectWithValue(data.message || 'Falha no login');
           }
           return data as LoginResponse;
-        } catch (error: unknown) {
-          let errorMessage = "Erro desconhecido";
-          if (error instanceof Error) {
-            errorMessage = error.message;
-          } else if (typeof error === "string") {
-            errorMessage = error;
-          }
-          return rejectWithValue(errorMessage);
+        } catch (_error: unknown) { // 
+          console.error("Login API Error:", _error);
+          return rejectWithValue("Não foi possível conectar ao servidor. Verifique sua conexão.");
         }
+      },
+      {
+        pending: (state) => {
+          state.status = 'loading';
+          state.error = null;
+        },
+        fulfilled: (state, action) => {
+          state.status = 'succeeded';
+          state.isAuthenticated = true;
+          state.user = action.payload.usuario;
+          state.permissions = action.payload.permissoes;
+          saveAuthState(state);
+        },
+        rejected: (state, action) => {
+          state.status = 'failed';
+          state.isAuthenticated = false;
+          state.user = null;
+          state.permissions = null;
+          state.error = action.payload as string;
+          clearAuthState();
+        },
       }
     ),
     
-    // 👇 Atualizar o reducer de logout
     logout: create.reducer((state) => {
-        state.user = null;
-        state.permissions = null;
-        state.isAuthenticated = false;
-        state.status = 'idle';
-        state.error = null;
-        // Limpa o estado do localStorage ao fazer logout
-        clearAuthState();
+      state.user = null;
+      state.permissions = null;
+      state.isAuthenticated = false;
+      state.status = 'idle';
+      state.error = null;
+      clearAuthState();
     }),
   }),
-  extraReducers: (builder) => {
-    builder
-      .addCase(authSlice.actions.loginUser.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(authSlice.actions.loginUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.isAuthenticated = true;
-        state.user = action.payload.usuario;
-        state.permissions = action.payload.permissoes;
-        // 👇 Salva o novo estado no localStorage após um login bem-sucedido
-        saveAuthState(state);
-      })
-      .addCase(authSlice.actions.loginUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.isAuthenticated = false; // Garante que não fique autenticado em caso de erro
-        state.user = null;
-        state.permissions = null;
-        state.error = action.payload as string;
-        // Limpa qualquer estado antigo em caso de falha no login
-        clearAuthState();
-      });
-  },
 });
 
 export const { loginUser, logout } = authSlice.actions;

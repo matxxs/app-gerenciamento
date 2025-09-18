@@ -1,13 +1,16 @@
+// app/(private)/layout.tsx
+
 "use client"
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useAppSelector } from "@/lib/hooks/app-selector";
 import { selectIsAuthenticated } from "@/lib/features/auth/auth-slice";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 
 export default function PrivateLayout({
   children,
@@ -60,6 +63,7 @@ export default function PrivateLayout({
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {children}
+          <Toaster richColors position="top-right" />
         </div>
       </SidebarInset>
     </SidebarProvider>

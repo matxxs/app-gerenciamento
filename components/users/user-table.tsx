@@ -1,67 +1,111 @@
 "use client";
 
-import type { UsuarioLista } from "@/lib/types";
-import { selectPermissions } from "@/lib/features/auth/auth-slice";
-import { useAppSelector } from "@/lib/hooks/app-selector";
-import { usePermissions } from "@/lib/hooks/use-permissions";
+import * as React from "react";
+import {
+  ColumnDef,
+  SortingState,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { UsuarioLista } from "@/lib/types";
 
 interface UserTableProps {
-  users: UsuarioLista[];
+  columns: ColumnDef<UsuarioLista>[];
+  data: UsuarioLista[];
 }
 
-export const UserTable = ({ users }: UserTableProps) => {
-  const permissions = useAppSelector(selectPermissions);
-  const { pode_atualizar, pode_deletar } = usePermissions('ADMIN_USUARIOS');
-  const handleEdit = (id: number) => alert(`Abrir modal para editar usuário ${id}...`);
-  const handleDelete = (id: number) => alert(`Confirmar exclusão do usuário ${id}...`);
+export function UserTable({ columns, data }: UserTableProps) {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  if (users.length === 0) {
-    return <p>Nenhum usuário encontrado.</p>;
-  }
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
+  });
 
   return (
     <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Nome Completo</th>
-            <th>E-mail</th>
-            <th>Função</th>
-            <th>Status</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id_usuario}>
-              <td>{user.nome_completo}</td>
-              <td>{user.email}</td>
-              <td>{user.nome_funcao}</td>
-              <td>
-                <span>
-                  {user.ativo ? 'Ativo' : 'Inativo'}
-                </span>
-              </td>
-              <td>
-                <button 
-                  onClick={() => handleEdit(user.id_usuario)}
-                  disabled={!pode_atualizar}
-                  title={!pode_atualizar ? 'Sem permissão para editar' : 'Editar'}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
                 >
-                  Editar
-                </button>
-                <button 
-                  onClick={() => handleDelete(user.id_usuario)}
-                  disabled={!pode_deletar} 
-                  title={!pode_deletar ? 'Sem permissão para excluir' : 'Excluir'}
-                >
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  Nenhum usuário encontrado.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+        >
+            Anterior
+        </Button>
+        <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+        >
+            Próxima
+        </Button>
+      </div>
     </div>
   );
-};
+}
